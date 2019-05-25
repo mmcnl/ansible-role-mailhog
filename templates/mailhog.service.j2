@@ -1,0 +1,31 @@
+# -*- mode: systemd -*-
+# {{ ansible_managed }}
+
+[Unit]
+Description=Mailhog
+After=syslog.target network.target
+StartLimitInterval=200
+StartLimitBurst=3
+
+[Service]
+Type=simple
+User={{ mailhog_user }}
+Group={{ mailhog_user }}
+UMask=0002
+
+ExecStart=/usr/local/bin/mailhog \
+  -api-bind-addr 127.0.0.1:8025 \
+  -ui-bind-addr 127.0.0.1:8025 \
+  -smtp-bind-addr 0.0.0.0:1025
+
+Restart=on-failure
+RestartSec=60
+
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=mailhog
+
+{% if mailhog_enabled %}
+[Install]
+WantedBy=multi-user.target
+{% endif %}

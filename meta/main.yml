@@ -1,0 +1,15 @@
+---
+dependencies:
+  - role: mmcnl.monit_handlers
+
+galaxy_info:
+  role_name: mailhog
+  author: mmcnl
+  description: "set up mailhog"
+  license: MIT
+  min_ansible_version: 2.4
+  platforms:
+    - name: Ubuntu
+      versions:
+        - bionic
+  galaxy_tags: []

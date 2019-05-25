@@ -1,0 +1,26 @@
+---
+- name: Create mailhog user
+  user:
+    name: mailhog
+    create_home: no
+    shell: /bin/false
+
+- name: install mailhog
+  get_url:
+    url: "{{ mailhog_download_url }}"
+    checksum: "{{ mailhog_download_checksum }}"
+    dest: /usr/local/bin/mailhog
+    mode: 0755
+
+- name: update mailhog systemd service config
+  template:
+    src: mailhog.service.j2
+    dest: /lib/systemd/system/mailhog.service
+  notify: update mailhog systemd status
+
+- name: watch mailhog with monit
+  template:
+    src: mailhog-monit.j2
+    dest: /etc/monit/conf.d/mailhog
+    mode: 0600
+  notify: reload monit
