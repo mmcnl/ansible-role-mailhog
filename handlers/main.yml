@@ -2,6 +2,6 @@
 - name: update mailhog systemd status
   systemd:
     name: mailhog
-    enabled: "{{ mailhog_enabled }}"
+    enabled: "{{ mailhog_enabled|bool }}"
     state: "{{ 'restarted' if mailhog_enabled else 'stopped' }}"
     daemon_reload: yes
