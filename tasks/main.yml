@@ -1,26 +1,53 @@
 ---
-- name: Create mailhog user
-  user:
-    name: mailhog
-    create_home: no
-    shell: /bin/false
+- name: set up mailhog
+  when: mailhog_enabled
+  block:
+    - name: Create mailhog user
+      user:
+        name: mailhog
+        create_home: no
+        shell: /bin/false
 
-- name: install mailhog
-  get_url:
-    url: "{{ mailhog_download_url }}"
-    checksum: "{{ mailhog_download_checksum }}"
-    dest: /usr/local/bin/mailhog
-    mode: 0755
+    - name: install mailhog
+      get_url:
+        url: "{{ mailhog_download_url }}"
+        checksum: "{{ mailhog_download_checksum }}"
+        dest: /usr/local/bin/mailhog
+        mode: 0755
 
-- name: update mailhog systemd service config
-  template:
-    src: mailhog.service.j2
-    dest: /lib/systemd/system/mailhog.service
-  notify: update mailhog systemd status
+    - name: update mailhog systemd service config
+      template:
+        src: mailhog.service.j2
+        dest: /lib/systemd/system/mailhog.service
+      notify: update mailhog systemd status
 
-- name: watch mailhog with monit
-  template:
-    src: mailhog-monit.j2
-    dest: /etc/monit/conf.d/mailhog
-    mode: 0600
-  notify: reload monit
+    - name: watch mailhog with monit
+      template:
+        src: mailhog-monit.j2
+        dest: /etc/monit/conf.d/mailhog
+        mode: 0600
+      notify: reload monit
+
+- name: remove mailhog
+  when: not mailhog_enabled
+  block:
+    - name: purge mailhog files
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - /etc/monit/conf.d/mailhog
+        - /lib/systemd/system/mailhog.service
+        - /usr/local/bin/mailhog
+
+    - name: disable mailhog
+      systemd:
+        name: mailhog
+        enabled: no
+        state: stopped
+        daemon_reload: yes
+
+    - name: reload monit
+      systemd:
+        name: monit
+        state: reloaded
