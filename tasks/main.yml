@@ -40,13 +40,6 @@
         - /lib/systemd/system/mailhog.service
         - /usr/local/bin/mailhog
 
-    - name: disable mailhog
-      systemd:
-        name: mailhog
-        enabled: no
-        state: stopped
-        daemon_reload: yes
-
     - name: reload monit
       systemd:
         name: monit
