@@ -31,6 +31,15 @@
 - name: remove mailhog
   when: not mailhog_enabled
   block:
+    - name: stop mailhog service
+      systemd:
+        name: mailhog
+        enabled: no
+        state: stopped
+        daemon_reload: yes
+      ignore_errors: yes
+      notify: reload monit
+
     - name: purge mailhog files
       file:
         path: "{{ item }}"
@@ -39,8 +48,4 @@
         - /etc/monit/conf.d/mailhog
         - /lib/systemd/system/mailhog.service
         - /usr/local/bin/mailhog
-
-    - name: reload monit
-      systemd:
-        name: monit
-        state: reloaded
+      notify: reload monit
